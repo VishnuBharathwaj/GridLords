@@ -1,68 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turn-based Chess-like Game</title>
-    <style>
-        #board {
-            display: grid;
-            grid-template-columns: repeat(5, 50px);
-            grid-template-rows: repeat(5, 50px);
-            gap: 2px;
-        }
-        .cell {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #000;
-            cursor: pointer;
-        }
-        .A {
-            background-color: lightblue;
-        }
-        .B {
-            background-color: lightcoral;
-        }
-        .selected {
-            border: 3px solid yellow;
-        }
-        #controls {
-            margin-top: 10px;
-        }
-        .btn {
-            padding: 5px;
-            margin: 5px;
-            cursor: pointer;
-        }
-        #history, #captured {
-            margin-top: 20px;
-        }
-        #history ul, #captured ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        #history li, #captured li {
-            margin: 5px 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Turn-based Chess-like Game</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    .winner-banner {
+    font-size: 3em;
+    font-weight: bold;
+    text-align: center;
+    color: #28a745;
+    background: linear-gradient(90deg, #d4fc79, #96e6a1);
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px auto;
+    max-width: 600px;
+    animation: bounceIn 1s ease, glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 10px #4caf50;
+    }
+    to {
+        box-shadow: 0 0 30px #81c784;
+    }
+}
+
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #rules-toggle {
+      display: block;
+      margin: 0 auto 15px auto;
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #rules {
+      max-width: 700px;
+      margin: 0 auto 20px auto;
+      padding: 15px;
+      background-color: #eef3fa;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      display: none;
+      transition: all 0.3s ease;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      grid-template-rows: repeat(5, 60px);
+      gap: 4px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #000;
+      font-weight: bold;
+      font-size: 18px;
+      background-color: #fff;
+      cursor: pointer;
+    }
+
+    .A {
+      background-color: lightblue;
+    }
+
+    .B {
+      background-color: lightcoral;
+    }
+
+    .selected {
+      border: 3px solid gold;
+    }
+
+    #controls {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 8px 12px;
+      margin: 5px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #history, #captured {
+      max-width: 700px;
+      margin: 20px auto;
+    }
+
+    #history ul, #captured ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #history li, #captured li {
+      margin: 5px 0;
+      padding: 5px;
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    ul li strong {
+      color: #333;
+    }
+  </style>
 </head>
 <body>
-    <h1>Turn-based Game</h1>
-    <div id="status"></div>
-    <div id="board"></div>
-    <div id="controls"></div>
-    <div id="history">
-        <h2>Move History</h2>
-        <ul id="history-list"></ul>
-    </div>
-    <div id="captured">
-        <h2>Captured Characters</h2>
-        <ul id="captured-list"></ul>
-    </div>
 
-    <script src="script.js"></script>
+  <h1>Turn-based Game</h1>
+
+  <button id="rules-toggle">Show Game Rules</button>
+  <section id="rules">
+    <h2>Game Rules</h2>
+    <h3>Overview</h3>
+    <p>This is a turn-based chess-like game played on a 5x5 grid between two players. Each controls 5 characters: 3 Pawns (P1–P3), Hero1 (H1), and Hero2 (H2).</p>
+    <p>Built with Node.js, WebSocket, and HTML/CSS/JS.</p>
+
+    <h3>Characters and Movement</h3>
+    <ul>
+      <li><strong>Pawn (P1–P3):</strong> Move 1 block (L, R, F, B)</li>
+      <li><strong>Hero1 (H1):</strong> Move 2 blocks straight (L, R, F, B); eliminates enemies in path</li>
+      <li><strong>Hero2 (H2):</strong> Move 2 blocks diagonally (FL, FR, BL, BR); eliminates enemies in path</li>
+    </ul>
+
+    <h3>Game Flow</h3>
+    <ul>
+      <li><strong>Setup:</strong> Players place characters on their rows</li>
+      <li><strong>Turns:</strong> Alternate one move per turn</li>
+      <li><strong>Combat:</strong> Move into opponent’s space to capture</li>
+      <li><strong>Win:</strong> Eliminate all opponent characters</li>
+    </ul>
+  </section>
+
+  <div id="status"></div>
+  <div id="board"></div>
+  <div id="controls"></div>
+
+  <div id="history">
+    <h2>Move History</h2>
+    <ul id="history-list"></ul>
+  </div>
+
+  <div id="captured">
+    <h2>Captured Characters</h2>
+    <ul id="captured-list"></ul>
+  </div>
+
+  <script>
+    document.getElementById('rules-toggle').addEventListener('click', function () {
+      const rules = document.getElementById('rules');
+      const btn = this;
+      if (rules.style.display === 'none' || rules.style.display === '') {
+        rules.style.display = 'block';
+        btn.textContent = 'Hide Game Rules';
+      } else {
+        rules.style.display = 'none';
+        btn.textContent = 'Show Game Rules';
+      }
+    });
+  </script>
+  <script src="script.js"></script>
 </body>
 </html>
