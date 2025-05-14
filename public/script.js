@@ -118,8 +118,9 @@ function renderCaptured() {
 
 function updateStatus() {
     if (gameState.winner) {
-        statusElement.textContent = `Player ${gameState.winner} wins!`;
+        statusElement.innerHTML = `<div class="winner-banner">🎉 Player ${gameState.winner} Wins! 🎉</div>`;
     } else {
         statusElement.textContent = `Current Turn: Player ${gameState.currentPlayer}`;
     }
 }
+
